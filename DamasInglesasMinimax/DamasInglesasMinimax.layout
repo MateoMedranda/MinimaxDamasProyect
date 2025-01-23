@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<FileVersion major="1" minor="0" />
+	<ActiveTarget name="Debug" />
+	<File name="sfml.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="16248" topLine="44" />
+		</Cursor>
+		<Folding>
+			<Collapse line="24" />
+			<Collapse line="35" />
+			<Collapse line="55" />
+			<Collapse line="69" />
+			<Collapse line="122" />
+			<Collapse line="271" />
+			<Collapse line="294" />
+			<Collapse line="350" />
+			<Collapse line="454" />
+			<Collapse line="490" />
+			<Collapse line="572" />
+			<Collapse line="1063" />
+			<Collapse line="1174" />
+			<Collapse line="1259" />
+		</Folding>
+	</File>
+</CodeBlocks_layout_file>
