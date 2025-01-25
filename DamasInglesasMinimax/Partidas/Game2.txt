@@ -1,4 +1,4 @@
 Usuario         || Puntaje    || Movimientos     || Estado    
 ------------------------------------------------------------
-mateo           || 0          || 3               || Perdedor  
-peter           || 2          || 4               || Ganador   
+sd              || 6          || 10              || Perdedor  
+asd             || 7          || 9               || Ganador   

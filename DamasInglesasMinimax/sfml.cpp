@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <omp.h>
+#include <limits>
+#include <vector>
 
 #include "Boton.h"
 #include "Jugador.h"
@@ -21,8 +23,11 @@ Music musica;
 Music sonidoGanador;
 Font cipher;
 
-//Permite generar el primer turno de forma aleatoria, para cada modo
-int generarTurnosAleatorios(){
+const int INF = numeric_limits<int>::max();
+const int NEG_INF = numeric_limits<int>::min();
+
+int generarTurnosAleatorios()
+{
     int turno;
     for(int i=0; i<2; i++)
     {
@@ -33,8 +38,9 @@ int generarTurnosAleatorios(){
     return turno;
 }
 
-void crearMatrizDamas(int damas[8][8]){
-    int tablero[8][8] =
+vector<vector<int>> crearTablero()
+{
+    return
     {
         {-1,1,-1,1,-1,1,-1,1},
         {1,-1,1,-1,1,-1,1,-1},
@@ -45,15 +51,10 @@ void crearMatrizDamas(int damas[8][8]){
         {-1,2,-1,2,-1,2,-1,2},
         {2,-1,2,-1,2,-1,2,-1},
     };
-
-    for (int i = 0; i < 8; i++){
-        for (int j = 0; j < 8; j++){
-            damas[i][j] = tablero[i][j];
-        }
-    }
 }
 
-void cambiarColorBoton(Boton &boton, RenderWindow &ventana){
+void cambiarColorBoton(Boton &boton, RenderWindow &ventana)
+{
 
     if (boton.isMouseOver(ventana))
     {
@@ -67,7 +68,8 @@ void cambiarColorBoton(Boton &boton, RenderWindow &ventana){
     }
 }
 
-void mostrarMensaje(RenderWindow& window, Font& font){
+void mostrarMensaje(RenderWindow& window, Font& font)
+{
     cout << "Iniciando ventana de mensaje" << endl;
 
     RenderWindow mensajeWindow(VideoMode(400, 300), "Mensaje", Style::Close);
@@ -120,7 +122,8 @@ void mostrarMensaje(RenderWindow& window, Font& font){
     }
 }
 
-vector<string> ventanaEntradaUsuario(RenderWindow& parentWindow, Font& font, int numJugadores){
+vector<string> ventanaEntradaUsuario(RenderWindow& parentWindow, Font& font, int numJugadores)
+{
     int windowHeight = 200 + 70 * numJugadores;
     RenderWindow window(VideoMode(400, windowHeight), "Jugadores", Style::Close);
     VideoMode desktopMode = VideoMode::getDesktopMode();
@@ -269,7 +272,8 @@ vector<string> ventanaEntradaUsuario(RenderWindow& parentWindow, Font& font, int
     return {};
 }
 
-bool haySaltosDisponiblesDamas(int x, int y, int tablero[8][8], int dx[], int dy[], int n){
+bool haySaltosDisponiblesDamas(int x, int y, vector<vector<int>> tablero, int dx[], int dy[], int n)
+{
     for (int i = 0; i < n; ++i)
     {
         int newX = x + dx[i];
@@ -292,7 +296,8 @@ bool haySaltosDisponiblesDamas(int x, int y, int tablero[8][8], int dx[], int dy
     return false;
 }
 
-void mostrarPrimerTurno(int n, Font &font, string jugador){
+void mostrarPrimerTurno(int n, Font &font, string jugador)
+{
     RenderWindow ventana(VideoMode(600,338),"Primer jugador");
     Texture textura, texturaDamas;
     textura.loadFromFile("Texturas/ventanaTurno.png");
@@ -332,15 +337,17 @@ void mostrarPrimerTurno(int n, Font &font, string jugador){
         ventana.clear();
         ventana.draw(fondo);
         fichaDamas.setPosition(50,75);
-        if(n == 1){
+        if(n == 1)
+        {
             texturaDamas.loadFromFile("Texturas/damaBlanca.png");
             fichaDamas.setTexture(texturaDamas);
         }
-        else{
+        else
+        {
             texturaDamas.loadFromFile("Texturas/damaNegra.png");
             fichaDamas.setTexture(texturaDamas);
         }
-            ventana.draw(fichaDamas);
+        ventana.draw(fichaDamas);
 
         ventana.draw(cifrados);
         ventana.draw(nombre);
@@ -348,7 +355,8 @@ void mostrarPrimerTurno(int n, Font &font, string jugador){
     }
 }
 
-bool quedanMovimientos(int tablero[8][8], int turno){
+bool quedanMovimientos(vector<vector<int>> tablero, int turno)
+{
 
     int contBlancas = 0, contadorNegras = 0;
 
@@ -452,7 +460,8 @@ bool quedanMovimientos(int tablero[8][8], int turno){
 
 }
 
-bool quedanFichasOponente(int tablero[8][8], int &jugador){
+bool quedanFichasOponente(vector<vector<int>> tablero, int &jugador)
+{
     int contBlancas = 0, contNegras = 0;
 
     for(int i = 0; i<8; i++)
@@ -488,7 +497,8 @@ bool quedanFichasOponente(int tablero[8][8], int &jugador){
     }
 }
 
-void mostrarGanador(Jugador ganador, Font &font, int m, int n){
+void mostrarGanador(Jugador ganador, Font &font, int m, int n)
+{
     RenderWindow ventana(VideoMode(900,506),"Ganador");
 
     musica.stop();
@@ -535,8 +545,8 @@ void mostrarGanador(Jugador ganador, Font &font, int m, int n){
     }
 
     Texture textura;
-        texto.setPosition(270,240);
-        textura.loadFromFile("Texturas/ganadorModoCaptura.png");
+    texto.setPosition(270,240);
+    textura.loadFromFile("Texturas/ganadorModoCaptura.png");
 
     textura.setSmooth(true);
     fondo.setTexture(&textura);
@@ -610,8 +620,7 @@ void jugarDamas(Font &font, vector<string> jugadores)
     RenderWindow Damas(VideoMode(1200,675),"Damas");
     Damas.setPosition(Vector2i(0,0));
 
-    int tablero[8][8];
-    crearMatrizDamas(tablero);
+    vector<vector<int>> tablero = crearTablero();
 
     RectangleShape fondo;
     Texture textura, textura1, textura2, textura3, textura4;
@@ -1051,6 +1060,204 @@ void jugarDamas(Font &font, vector<string> jugadores)
         Damas.display();
     }
 }
+
+//Aqui va todo el algoritmo para minimax
+
+int evaluarTablero(vector<vector<int>> tablero){
+
+    int valor = 0;
+
+    for(int i=0; i<8;i++){
+        for(int j=0;j<8;j++){
+            if(tablero[i][j] == 1){
+                valor += 10;
+            }else if (tablero[i][j] == 2){
+                valor -= 10;
+            }else if (tablero[i][j] == 3){
+                valor +=20;
+            }else if (tablero[i][j] == 4){
+                valor -=20;
+            }
+        }
+    }
+
+    return valor;
+}
+
+void obtenerSaltos(vector<vector<vector<int>>> &movimientos, vector<vector<vector<int>>> &saltos, vector<vector<int>> movimiento, int x, int y, int dx[], int dy[], int n){
+
+    if(!haySaltosDisponiblesDamas(x,y,movimiento,dx,dy,n)){
+        movimientos.push_back(movimiento);
+        return;
+    }
+
+    vector<vector<int>> tablero = movimiento;
+
+    for (int i = 0; i < n; ++i)
+    {
+        int newX = x + dx[i];
+        int newY = y + dy[i];
+        int temp;
+
+        if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (tablero[newY][newX] != tablero[y][x]) && (tablero[newY][newX] != 0) && !(tablero[newY][newX]+2 == tablero[y][x]) && !(tablero[newY][newX] == 2+tablero[y][x]))
+        {
+            int antx = newX, anty = newY;
+            newX = newX + dx[i];
+            newY = newY + dy[i];
+
+            if(newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && tablero[newY][newX] == 0)
+            {
+
+                temp = tablero[y][x];
+                tablero[y][x] = 0;
+                tablero[newY][newX] = temp;
+                tablero[anty][antx] = 0;
+
+                if(newY == 0 && temp == 2) tablero[newY][newX] = 4;
+                if(newY == 7 && temp == 1) tablero[newY][newX] = 3;
+
+                saltos.push_back(tablero);
+                obtenerSaltos(movimientos, saltos,tablero,newX,newY,dx,dy,n);
+
+                tablero = movimiento;
+            }
+
+        }
+    }
+    return;
+}
+
+vector<vector<vector<int>>> obtenerMovimientosPosibles(vector<vector<int>> estado, int jugador){
+    vector<vector<vector<int>>> movimientos;
+    vector<vector<vector<int>>> saltos;
+
+    vector<vector<int>> movimiento = estado;
+
+    for(int i = 0; i<8; i++)
+    {
+        for(int j = 0; j<8; j++)
+        {
+
+            int dx[4];
+            int dy[4];
+            int n;
+
+            if(movimiento[i][j] == 1)
+            {
+
+                dx[0] = -1;
+                dx[1] = 1;
+                dy[0] = 1;
+                dy[1] = 1;
+                n = 2;
+
+            }
+            else if(movimiento[i][j] == 2)
+            {
+
+                dx[0] = -1;
+                dx[1] = 1;
+                dy[0] = -1;
+                dy[1] = -1;
+                n = 2;
+
+            }
+            else if(movimiento[i][j] == 3 || movimiento[i][j] == 4)
+            {
+
+                dx[0] = -1;
+                dx[1] = 1;
+                dx[2] = -1;
+                dx[3] = 1;
+                dy[0] = -1;
+                dy[1] = -1;
+                dy[2] = 1;
+                dy[3] = 1;
+                n = 4;
+            }
+
+            bool salto = false;
+            int newX;
+            int newY;
+
+            if(movimiento[i][j]==jugador || movimiento[i][j] == jugador+2)
+            {
+                for(int k=0; k<n; k++)
+                {
+
+
+                    int newX = j + dx[k];
+                    int newY = i + dy[k];
+
+                    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (movimiento[newY][newX] == 0) && !salto)
+                    {
+                        int temp = movimiento[i][j];
+                        movimiento[i][j] = 0;
+                        movimiento[newY][newX] = temp;
+                        movimientos.push_back(movimiento);
+                    }
+
+                    movimiento = estado;
+                }
+
+                if(haySaltosDisponiblesDamas(j,i,movimiento,dx,dy,n)){
+                    obtenerSaltos(movimientos,saltos,movimiento,j,i,dx,dy,n);
+
+                }
+            }
+
+
+        }
+
+    }
+
+    return movimientos;
+}
+
+int minimax(vector<vector<int>> tablero, int profundidad, int jugador, bool esMax){
+    if(!quedanMovimientos(tablero,jugador) || !quedanFichasOponente(tablero, jugador) || profundidad == 0){
+        return evaluarTablero(tablero);
+    }
+
+    if (esMax) {
+        int maxEval = NEG_INF;
+        for (const auto& movimiento : obtenerMovimientosPosibles(tablero, jugador)) {
+            int eval = minimax(movimiento, profundidad-1,jugador+1, false);
+            maxEval = max(maxEval, eval);
+        }
+        return maxEval;
+
+    }else {
+        int minEval = INF;
+        for (const auto& movimiento : obtenerMovimientosPosibles(tablero,jugador)) {
+            int eval = minimax(movimiento, profundidad - 1,jugador-1, true);
+            minEval = min(minEval, eval);
+        }
+        return minEval;
+    }
+
+
+}
+
+ vector<vector<int>> encontrarMejorMovimiento(vector<vector<int>> tablero, int profundidad, int jugador){
+    int mejorValor = NEG_INF;
+    vector<vector<int>> mejorMovimiento;
+
+    for (const auto& movimiento : obtenerMovimientosPosibles(tablero, jugador)) {
+
+        int valorMovimiento = minimax(movimiento, profundidad - 1,jugador+1, false);
+
+        if (valorMovimiento > mejorValor) {
+            mejorValor = valorMovimiento;
+            mejorMovimiento = movimiento;
+        }
+    }
+
+    return mejorMovimiento;
+ }
+
+//Aqui termina el algoritmo para minimax
+
 
 void abrirJugar(RenderWindow &Jugar, Font &font, Boton modosJuego[])
 {
