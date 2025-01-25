@@ -1,4 +1,4 @@
 Usuario         || Puntaje    || Movimientos     || Estado    
 ------------------------------------------------------------
-sd              || 6          || 10              || Perdedor  
-asd             || 7          || 9               || Ganador   
+Computador      || 12         || 40              || Ganador   
+Humano          || 8          || 40              || Perdedor  

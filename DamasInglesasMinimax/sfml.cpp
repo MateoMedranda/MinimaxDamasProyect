@@ -408,11 +408,11 @@ bool quedanMovimientos(vector<vector<int>> tablero, int turno)
                 if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (tablero[newY][newX] == 0))
                 {
 
-                    if(tablero[i][j] == 1)
+                    if(tablero[i][j] == 1 && n==2 || tablero[i][j]==3 && n==4)
                     {
                         contBlancas++;
                     }
-                    else if(tablero[i][j] == 2)
+                    else if(tablero[i][j] == 2 && n==2 || tablero[i][j] == 4 && n==4)
                     {
                         contadorNegras++;
                     }
@@ -426,11 +426,11 @@ bool quedanMovimientos(vector<vector<int>> tablero, int turno)
 
                     if(newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && tablero[newY][newX] == 0)
                     {
-                        if(tablero[i][j] == 1)
+                        if(tablero[i][j] == 1 && n==2 || tablero[i][j]==3 && n==4)
                         {
                             contBlancas++;
                         }
-                        else if(tablero[i][j] == 2)
+                        else if(tablero[i][j] == 2 && n==2 || tablero[i][j]==4 && n==4)
                         {
                             contadorNegras++;
                         }
@@ -443,18 +443,10 @@ bool quedanMovimientos(vector<vector<int>> tablero, int turno)
     if(contBlancas == 0 && turno == 1)
     {
         return false;
-    }
-    else
-    {
-        return true;
-    }
-
-    if(contadorNegras == 0 && turno == 2)
+    }else if(contadorNegras == 0 && turno == 2)
     {
         return false;
-    }
-    else
-    {
+    }else {
         return true;
     }
 
@@ -1074,9 +1066,9 @@ int evaluarTablero(vector<vector<int>> tablero){
             }else if (tablero[i][j] == 2){
                 valor -= 10;
             }else if (tablero[i][j] == 3){
-                valor +=20;
+                valor +=10;
             }else if (tablero[i][j] == 4){
-                valor -=20;
+                valor -=10;
             }
         }
     }
@@ -1194,6 +1186,10 @@ vector<vector<vector<int>>> obtenerMovimientosPosibles(vector<vector<int>> estad
                         int temp = movimiento[i][j];
                         movimiento[i][j] = 0;
                         movimiento[newY][newX] = temp;
+
+                        if(newY == 0 && temp == 2) movimiento[newY][newX] = 4;
+                        if(newY == 7 && temp == 1) movimiento[newY][newX] = 3;
+
                         movimientos.push_back(movimiento);
                     }
 
@@ -1256,6 +1252,510 @@ int minimax(vector<vector<int>> tablero, int profundidad, int jugador, bool esMa
     return mejorMovimiento;
  }
 
+int calcularPuntajeIA(vector<vector<int>> tablero){
+    int contadorOP = 0;
+    int cont = 12;
+
+    for(int i = 0; i< 8; i++){
+        for(int j = 0; j<8; j++){
+            if(tablero[i][j] == 2){
+                contadorOP ++;
+            }
+        }
+    }
+
+    return cont - contadorOP;
+}
+
+ void jugarDamasIA(Font &font, vector<string> jugadores)
+{
+    vector<Jugador> listaJugadores;
+    for (const auto& nombre : jugadores)
+    {
+        listaJugadores.emplace_back(nombre);
+    }
+
+    SoundBuffer moverBuffer, comerBuffer,damaBuffer;
+    Sound sonidoMover, sonidoComer, sonidoDama;
+
+    Text texto[2], puntajesTexto[2], movimientosTexto[2];
+
+    for(int i = 0; i<2; i++)
+    {
+        texto[i].setCharacterSize(30);
+        texto[i].setFont(font);
+        texto[i].setStyle(Text::Underlined);
+        texto[i].setString(jugadores[i]);
+        texto[i].setPosition(50+(i*944), 226);
+        texto[i].setColor(Color::Cyan);
+
+        puntajesTexto[i].setCharacterSize(30);
+        puntajesTexto[i].setFont(font);
+        puntajesTexto[i].setPosition(50 + (i * 944), 266); // Posición para el puntaje
+        puntajesTexto[i].setFillColor(Color::White);
+        puntajesTexto[i].setString("Puntaje: \n0");
+
+        movimientosTexto[i].setCharacterSize(25);
+        movimientosTexto[i].setFont(font);
+        movimientosTexto[i].setPosition(50 + (i * 944), 344);
+        movimientosTexto[i].setFillColor(Color::White);
+        movimientosTexto[i].setString("Movimientos: \n0");
+
+    }
+
+    moverBuffer.loadFromFile("Audios/moverPieza.ogg");
+    sonidoMover.setBuffer(moverBuffer);
+    sonidoMover.setVolume(100);
+    comerBuffer.loadFromFile("Audios/comerPieza.ogg");
+    sonidoComer.setBuffer(comerBuffer);
+    sonidoComer.setVolume(100);
+    damaBuffer.loadFromFile("Audios/obtenerDama.wav");
+    sonidoDama.setBuffer(damaBuffer);
+    sonidoDama.setVolume(15);
+
+    RenderWindow Damas(VideoMode(1200,675),"Damas");
+    Damas.setPosition(Vector2i(0,0));
+
+    vector<vector<int>> tablero = crearTablero();
+
+    RectangleShape fondo;
+    Texture textura, textura1, textura2, textura3, textura4;
+    fondo.setSize(Vector2f(1200,675));
+    textura.loadFromFile("Texturas/tablero_damas.png");
+    textura.setSmooth(true);
+    textura1.loadFromFile("Texturas/damaBaseBlanca.png");
+    textura2.loadFromFile("Texturas/damaBaseNegra.png");
+    textura3.loadFromFile("Texturas/damaBlanca.png");
+    textura4.loadFromFile("Texturas/damaNegra.png");
+    fondo.setTexture(&textura);
+
+    Sprite fichaBlanca, fichaNegra, damaBlanca, damaNegra;
+    fichaBlanca.setTexture(textura1);
+    fichaNegra.setTexture(textura2);
+    damaBlanca.setTexture(textura3);
+    damaNegra.setTexture(textura4);
+
+    CircleShape movimiento(30.0f); // Tamaño del círculo para mostrar los movimientos
+    movimiento.setFillColor(Color(0, 255, 0, 100)); // Color verde transparente
+    movimiento.setOutlineThickness(6.f);
+    movimiento.setOutlineColor(sf::Color(250, 150, 100));
+
+    const float offsetX = 260.0f;
+    const float offsetY = 0.0f;
+    const float tamanoCasilla = 85.0f;
+
+    bool fichaSeleccionada = false;
+    int fichaSeleccionadaX = -1;
+    int fichaSeleccionadaY = -1;
+    int turno = 2;
+    //int puntajes[2] = {0, 0}; // Puntajes de los jugadores.
+    bool salto = false;
+    int xSalto = -1;
+    int ySalto = -1;
+    int ganador;
+    int puntajeGanador;
+
+    mostrarPrimerTurno(turno,font,jugadores[turno-1]);
+    vector<int> puntajes(jugadores.size(), 0);
+    vector<int> movimientosLista(jugadores.size(), 0);
+
+    while(Damas.isOpen())
+    {
+        Event aevent;
+        while(Damas.pollEvent(aevent))
+        {
+
+            if(turno == 1){
+                vector<vector<int>> movimientoIA = encontrarMejorMovimiento(tablero,5,1);
+                tablero = movimientoIA;
+                movimientosLista[0]+=1;
+                sonidoMover.play();
+                puntajes[0] = calcularPuntajeIA(tablero);
+                turno = 2;
+                break;
+            }
+
+            if(!quedanFichasOponente(tablero,ganador))
+            {
+                cout << "se quedo sin fichas " << ganador <<  endl;
+                puntajeGanador = -1;
+                for (size_t i = 0; i < listaJugadores.size(); ++i)
+                {
+                    listaJugadores[i].actualizarPuntos(puntajes[i]);
+                    listaJugadores[i].actualizarMovimientos(movimientosLista[i]);
+                }
+                Jugador::determinarEstado(puntajes, listaJugadores);
+                Jugador::guardarJugadoresEnArchivo(listaJugadores);
+
+                mostrarGanador(listaJugadores[ganador],font, 1, puntajeGanador);
+                Damas.close();
+                break;
+            }
+
+            if(!quedanMovimientos(tablero, turno))
+            {
+                cout << "se quedo sin movimientos" << endl;
+                for (size_t i = 0; i < listaJugadores.size(); ++i)
+                {
+                    listaJugadores[i].actualizarPuntos(puntajes[i]);
+                    listaJugadores[i].actualizarMovimientos(movimientosLista[i]);
+                }
+                Jugador::determinarEstado(puntajes, listaJugadores);
+
+                if(puntajes[0] > puntajes [1])
+                {
+                    puntajeGanador = 0;
+                    mostrarGanador(listaJugadores[puntajeGanador], font,1, puntajeGanador);
+                }
+                else if(puntajes[0] < puntajes[1])
+                {
+                    puntajeGanador = 1;
+                    mostrarGanador(listaJugadores[puntajeGanador], font,1, puntajeGanador);
+                }
+                else
+                {
+                    puntajeGanador = 2;
+                    mostrarGanador(listaJugadores[0], font,1, puntajeGanador);
+                }
+                Jugador::guardarJugadoresEnArchivo(listaJugadores);
+
+                Damas.close();
+                break;
+            }
+
+            switch(aevent.type)
+            {
+            case Event::Closed:
+            {
+                Jugador::determinarEstado(puntajes, listaJugadores);
+                Jugador::guardarJugadoresEnArchivo(listaJugadores);
+                Damas.close();
+            }
+            break;
+
+            case Event::MouseButtonPressed:
+            {
+
+                int temp;
+                if (aevent.mouseButton.button == Mouse::Left)
+                {
+
+                    float x = Mouse::getPosition(Damas).x;
+                    float y = Mouse::getPosition(Damas).y;
+
+                    cout << x << endl;
+                    cout << y << endl;
+
+                    int i = (y-offsetY)/tamanoCasilla;
+                    int j = (x-offsetX)/tamanoCasilla;
+
+                    cout << "i: " << i << "j: " << j << endl;
+
+                    cout << tablero[i][j] << endl;
+
+
+                    if((i>=0) && (i<8) && (j>=0) && (j<8))
+                    {
+                        if(((tablero[i][j] == 1) || (tablero[i][j] == 2) || (tablero[i][j] == 3) || (tablero[i][j] == 4)) && (tablero[i][j] == turno || tablero[i][j] == turno+2))
+                        {
+
+                            if (fichaSeleccionada)
+                            {
+                                fichaSeleccionada = false; // Deselecciona la ficha
+                            }
+                            else
+                            {
+                                fichaSeleccionada = true; // Selecciona una ficha
+                                fichaSeleccionadaX = j;
+                                fichaSeleccionadaY = i;
+                            }
+
+                            if(salto)
+                            {
+                                fichaSeleccionada = true;
+                                fichaSeleccionadaX = xSalto;
+                                fichaSeleccionadaY = ySalto;
+                            }
+
+                        }
+                        else if(tablero[i][j] == 0 && fichaSeleccionada)
+                        {
+
+                            int dx[4];
+                            int dy[4];
+                            int n;
+
+                            if(tablero[fichaSeleccionadaY][fichaSeleccionadaX] == 1)
+                            {
+
+                                dx[0] = -1;
+                                dx[1] = 1;
+                                dy[0] = 1;
+                                dy[1] = 1;
+                                n = 2;
+
+                            }
+                            else if(tablero[fichaSeleccionadaY][fichaSeleccionadaX] == 2)
+                            {
+
+                                dx[0] = -1;
+                                dx[1] = 1;
+                                dy[0] = -1;
+                                dy[1] = -1;
+                                n = 2;
+
+                            }
+                            else if(tablero[fichaSeleccionadaY][fichaSeleccionadaX] == 3 || tablero[fichaSeleccionadaY][fichaSeleccionadaX] == 4)
+                            {
+                                dx[0] = -1;
+                                dx[1] = 1;
+                                dx[2] = -1;
+                                dx[3] = 1;
+                                dy[0] = -1;
+                                dy[1] = -1;
+                                dy[2] = 1;
+                                dy[3] = 1;
+                                n = 4;
+                            }
+
+                            for (int k = 0; k < n; ++k)
+                            {
+                                int newX = fichaSeleccionadaX + dx[k];
+                                int newY = fichaSeleccionadaY + dy[k];
+
+                                if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (tablero[newY][newX] == 0) && !salto)
+                                {
+                                    cout << "fichax: " << fichaSeleccionadaX << "fichaY: " << fichaSeleccionadaY << endl;
+                                    cout << "x: " << newX << "y: " << newY << endl;
+                                    if(newX == j && newY == i)
+                                    {
+                                        temp = tablero[fichaSeleccionadaY][fichaSeleccionadaX];
+                                        tablero[fichaSeleccionadaY][fichaSeleccionadaX] = 0;
+                                        tablero[newY][newX] = temp;
+                                        sonidoMover.play();
+
+                                        movimientosLista[1]+=1;
+                                        turno = 1;
+
+                                        if(newY == 0 && temp == 2)
+                                        {
+                                            tablero[newY][newX] = 4;
+                                            sonidoDama.play();
+                                        }
+                                        if(newY == 7 && temp == 1)
+                                        {
+                                            tablero[newY][newX] = 3;
+                                            sonidoDama.play();
+                                        }
+                                    }
+                                }
+
+                                if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (tablero[newY][newX] != tablero[fichaSeleccionadaY][fichaSeleccionadaX]) && (tablero[newY][newX] != 0) && !(tablero[newY][newX]+2 == tablero[fichaSeleccionadaY][fichaSeleccionadaX]) && !(tablero[newY][newX] == 2+tablero[fichaSeleccionadaY][fichaSeleccionadaX]))
+                                {
+                                    int antx = newX, anty = newY;
+                                    newX = newX + dx[k];
+                                    newY = newY + dy[k];
+
+                                    if(newX == j && newY == i && tablero[newY][newX] == 0)
+                                    {
+                                        temp = tablero[fichaSeleccionadaY][fichaSeleccionadaX];
+                                        if (temp == 3 || temp == 4)
+                                        {
+                                            if (tablero[anty][antx] == 3 || tablero[anty][antx] == 4)
+                                            {
+                                                puntajes[turno - 1] += 1; // REina captura reina
+                                            }
+                                            else
+                                            {
+                                                puntajes[turno - 1] += 1; // reina captura ficha
+                                            }
+                                        }
+                                        else if (tablero[anty][antx] == 3 || tablero[anty][antx] == 4)
+                                        {
+                                            puntajes[turno - 1] += 5; // ficha captura reina
+                                        }
+                                        else
+                                        {
+                                            puntajes[turno - 1] += 1; // ficha captura  ficha
+                                        }
+
+                                        tablero[fichaSeleccionadaY][fichaSeleccionadaX] = 0;
+                                        tablero[newY][newX] = temp;
+                                        tablero[anty][antx] = 0;
+                                        sonidoMover.play();
+                                        sonidoComer.play();
+
+                                        if (haySaltosDisponiblesDamas(newX, newY, tablero, dx, dy, n))
+                                        {
+
+                                            salto = true;
+                                            xSalto = newX;
+                                            ySalto = newY;
+                                        }
+                                        else
+                                        {
+
+                                            salto = false;
+                                            movimientosLista[1]+=1;
+                                            turno = 1;
+                                        }
+
+
+                                        if(newY == 0 && temp == 2)
+                                        {
+                                            tablero[newY][newX] = 4;
+                                            sonidoDama.play();
+                                        }
+                                        if(newY == 7 && temp == 1)
+                                        {
+                                            tablero[newY][newX] = 3;
+                                            sonidoDama.play();
+                                        }
+                                    }
+
+                                }
+                            }
+                            fichaSeleccionada = false;
+                        }
+                    }
+
+
+                }
+            }
+            break;
+            }
+        }
+
+        puntajesTexto[0].setString("Puntaje: \n" + to_string(puntajes[0]));
+        puntajesTexto[1].setString("Puntaje: \n" + to_string(puntajes[1]));
+        movimientosTexto[0].setString("Movimientos: \n" + to_string(movimientosLista[0]));
+        movimientosTexto[1].setString("Movimientos: \n" + to_string(movimientosLista[1]));
+
+        for (size_t i = 0; i < listaJugadores.size(); ++i)
+        {
+            listaJugadores[i].actualizarPuntos(puntajes[i]);
+        }
+
+        for (size_t i = 0; i < listaJugadores.size(); ++i)
+        {
+            listaJugadores[i].actualizarMovimientos(movimientosLista[i]);
+        }
+
+        Damas.clear();
+        Damas.draw(fondo);
+        for(int i = 0; i<2; i++)
+        {
+            Damas.draw(texto[i]);
+            Damas.draw(puntajesTexto[i]);
+            Damas.draw(movimientosTexto[i]);
+        }
+
+        for(int i = 0; i < 8; i++)
+        {
+            for(int j = 0; j < 8; j++)
+            {
+                float x = offsetX + j * tamanoCasilla;
+                float y = offsetY + i * tamanoCasilla;
+
+                if(tablero[i][j] == 1)
+                {
+                    fichaBlanca.setPosition(x, y);
+                    Damas.draw(fichaBlanca);
+                }
+                if(tablero[i][j] == 2)
+                {
+                    fichaNegra.setPosition(x, y);
+                    Damas.draw(fichaNegra);
+                }
+                if(tablero[i][j] == 3)
+                {
+                    damaBlanca.setPosition(x,y);
+                    Damas.draw(damaBlanca);
+                }
+                if(tablero[i][j] == 4)
+                {
+                    damaNegra.setPosition(x,y);
+                    Damas.draw(damaNegra);
+                }
+            }
+        }
+
+        if (fichaSeleccionada || salto)
+        {
+            int dx[4];
+            int dy[4];
+            int n;
+
+            if(tablero[fichaSeleccionadaY][fichaSeleccionadaX] == 1)
+            {
+
+                dx[0] = -1;
+                dx[1] = 1;
+                dy[0] = 1;
+                dy[1] = 1;
+                n = 2;
+
+            }
+            else if(tablero[fichaSeleccionadaY][fichaSeleccionadaX] == 2)
+            {
+
+                dx[0] = -1;
+                dx[1] = 1;
+                dy[0] = -1;
+                dy[1] = -1;
+                n = 2;
+
+            }
+            else if (tablero[fichaSeleccionadaY][fichaSeleccionadaX] == 3 || tablero[fichaSeleccionadaY][fichaSeleccionadaX] == 4 )
+            {
+                dx[0] = -1;
+                dx[1] = 1;
+                dx[2] = -1;
+                dx[3] = 1;
+                dy[0] = -1;
+                dy[1] = -1;
+                dy[2] = 1;
+                dy[3] = 1;
+                n = 4;
+            }
+
+            if(salto)
+            {
+                fichaSeleccionada = true;
+                fichaSeleccionadaX = xSalto;
+                fichaSeleccionadaY = ySalto;
+            }
+
+            for (int i = 0; i < n; ++i)
+            {
+                int newX = fichaSeleccionadaX + dx[i];
+                int newY = fichaSeleccionadaY + dy[i];
+
+                if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (tablero[newY][newX] == 0) && !salto)
+                {
+                    movimiento.setPosition(offsetX + newX*tamanoCasilla + (tamanoCasilla/2 - movimiento.getRadius()),offsetY + newY*tamanoCasilla + (tamanoCasilla/ 2 - movimiento.getRadius()));
+                    Damas.draw(movimiento);
+                }
+
+                if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (tablero[newY][newX] != tablero[fichaSeleccionadaY][fichaSeleccionadaX]) && (tablero[newY][newX] != 0) && !(tablero[newY][newX]+2 == tablero[fichaSeleccionadaY][fichaSeleccionadaX])&& !(tablero[newY][newX] == 2+ tablero[fichaSeleccionadaY][fichaSeleccionadaX]))
+                {
+                    newX = newX+ dx[i];
+                    newY = newY + dy[i];
+                    if(tablero[newY][newX] == 0 && newX >= 0 && newX < 8 && newY >= 0 && newY < 8)
+                    {
+                        movimiento.setPosition(offsetX + newX*tamanoCasilla + (tamanoCasilla/2 - movimiento.getRadius()),offsetY + newY*tamanoCasilla + (tamanoCasilla/ 2 - movimiento.getRadius()));
+                        Damas.draw(movimiento);
+                    }
+                }
+            }
+
+        }
+        Damas.display();
+    }
+}
+
+
+
 //Aqui termina el algoritmo para minimax
 
 
@@ -1278,7 +1778,7 @@ void abrirJugar(RenderWindow &Jugar, Font &font, Boton modosJuego[])
             break;
 
         case Event::MouseMoved:
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 cambiarColorBoton(modosJuego[i], Jugar);
             }
@@ -1288,7 +1788,14 @@ void abrirJugar(RenderWindow &Jugar, Font &font, Boton modosJuego[])
         {
             bool cerrado = false;
 
-            if(modosJuego[5].isMouseOver(Jugar))
+            if(modosJuego[0].isMouseOver(Jugar)){
+                vector<string> jugadores = {"Computador", "Humano"};
+
+                jugarDamasIA(font,jugadores);
+                cerrado = true;
+            }
+
+            if(modosJuego[1].isMouseOver(Jugar))
             {
                 //Jugar.close();
                 vector<string> jugadores = ventanaEntradaUsuario(Jugar, font, 2);
@@ -1299,6 +1806,8 @@ void abrirJugar(RenderWindow &Jugar, Font &font, Boton modosJuego[])
                 }
 
             }
+
+
             if(cerrado)
             {
                 Jugar.create(VideoMode(1200,675), "Jugar", Style::Default);
@@ -1313,7 +1822,7 @@ void abrirJugar(RenderWindow &Jugar, Font &font, Boton modosJuego[])
 
     Jugar.clear();
     Jugar.draw(fondo);
-    for(int i = 0; i < 6; i++)
+    for(int i = 0; i < 2; i++)
     {
         modosJuego[i].drawTo(Jugar);
     }
@@ -1463,20 +1972,16 @@ void iniciarJuego()
     anterior.setFont(font);
 
     posicion = 125;
-    Boton modosJuego[6];
-    string textoBotonesJugar[] = {"2 Jugadores", "3 Jugadores", "4 Jugadores", "5 Jugadores", "6 Jugadores", "2 Jugadores"};
+    Boton modosJuego[2];
+    string textoBotonesJugar[] = {"Contra MINIMAX", "2 Jugadores"};
 
-    for (int i = 0; i<5; i++)
+    for (int i = 0; i<2; i++)
     {
         modosJuego[i] = Boton(textoBotonesJugar[i], {325,55},35,Color(255, 255, 255, 0),Color::White);
         modosJuego[i].setPosition({100,posicion + i*55});
         modosJuego[i].setFont(font);
     }
 
-    modosJuego[5] = Boton(textoBotonesJugar[5], {325,55},40,Color(255, 255, 255, 0),Color::White);
-
-    modosJuego[5].setPosition({100,560});
-    modosJuego[5].setFont(font);
 
     Boton botonExtra = Boton("", {325,200}, 0, Color(0,0,0,0), Color::White);
     botonExtra.setPosition(Vector2f(800, 40));
