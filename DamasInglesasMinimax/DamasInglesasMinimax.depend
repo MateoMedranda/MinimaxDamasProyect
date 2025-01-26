@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1737832458 source:c:\users\mateo\desktop\minimaxdamasproyect\damasinglesasminimax\sfml.cpp
+1737906137 source:c:\users\mateo\desktop\minimaxdamasproyect\damasinglesasminimax\sfml.cpp
 	<SFML/Graphics.hpp>
 	<SFML/Audio.hpp>
 	<string>
@@ -10,6 +10,7 @@
 	<omp.h>
 	<limits>
 	<vector>
+	<sys/time.h>
 	"Boton.h"
 	"Jugador.h"
 

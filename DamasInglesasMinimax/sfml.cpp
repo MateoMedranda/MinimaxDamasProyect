@@ -9,6 +9,7 @@
 #include <omp.h>
 #include <limits>
 #include <vector>
+#include <sys/time.h>
 
 #include "Boton.h"
 #include "Jugador.h"
@@ -36,6 +37,12 @@ int generarTurnosAleatorios()
     }
 
     return turno;
+}
+
+long obtenerTiempo(){
+struct timeval inicio;
+gettimeofday(&inicio,NULL);
+return inicio.tv_sec*1000000+inicio.tv_usec;
 }
 
 vector<vector<int>> crearTablero()
@@ -1125,17 +1132,14 @@ vector<vector<vector<int>>> obtenerMovimientosPosibles(vector<vector<int>> estad
 
     vector<vector<int>> movimiento = estado;
 
-    for(int i = 0; i<8; i++)
-    {
-        for(int j = 0; j<8; j++)
-        {
+    for(int i = 0; i<8; i++){
+        for(int j = 0; j<8; j++){
 
             int dx[4];
             int dy[4];
             int n;
 
-            if(movimiento[i][j] == 1)
-            {
+            if(movimiento[i][j] == 1){
 
                 dx[0] = -1;
                 dx[1] = 1;
@@ -1143,9 +1147,7 @@ vector<vector<vector<int>>> obtenerMovimientosPosibles(vector<vector<int>> estad
                 dy[1] = 1;
                 n = 2;
 
-            }
-            else if(movimiento[i][j] == 2)
-            {
+            }else if(movimiento[i][j] == 2){
 
                 dx[0] = -1;
                 dx[1] = 1;
@@ -1153,10 +1155,7 @@ vector<vector<vector<int>>> obtenerMovimientosPosibles(vector<vector<int>> estad
                 dy[1] = -1;
                 n = 2;
 
-            }
-            else if(movimiento[i][j] == 3 || movimiento[i][j] == 4)
-            {
-
+            }else if(movimiento[i][j] == 3 || movimiento[i][j] == 4){
                 dx[0] = -1;
                 dx[1] = 1;
                 dx[2] = -1;
@@ -1172,12 +1171,8 @@ vector<vector<vector<int>>> obtenerMovimientosPosibles(vector<vector<int>> estad
             int newX;
             int newY;
 
-            if(movimiento[i][j]==jugador || movimiento[i][j] == jugador+2)
-            {
-                for(int k=0; k<n; k++)
-                {
-
-
+            if(movimiento[i][j]==jugador || movimiento[i][j] == jugador+2){
+                for(int k=0; k<n; k++){
                     int newX = j + dx[k];
                     int newY = i + dy[k];
 
@@ -1198,13 +1193,9 @@ vector<vector<vector<int>>> obtenerMovimientosPosibles(vector<vector<int>> estad
 
                 if(haySaltosDisponiblesDamas(j,i,movimiento,dx,dy,n)){
                     obtenerSaltos(movimientos,saltos,movimiento,j,i,dx,dy,n);
-
                 }
             }
-
-
         }
-
     }
 
     return movimientos;
@@ -1215,18 +1206,25 @@ int minimax(vector<vector<int>> tablero, int profundidad, int jugador, bool esMa
         return evaluarTablero(tablero);
     }
 
+    vector<vector<vector<int>>> movimientosP = obtenerMovimientosPosibles(tablero, jugador);
+
+
     if (esMax) {
         int maxEval = NEG_INF;
-        for (const auto& movimiento : obtenerMovimientosPosibles(tablero, jugador)) {
-            int eval = minimax(movimiento, profundidad-1,jugador+1, false);
+
+        for (int i = 0; i < movimientosP.size();i++) {
+
+            int eval = minimax(movimientosP[i], profundidad-1,jugador+1, false);
             maxEval = max(maxEval, eval);
         }
         return maxEval;
 
     }else {
         int minEval = INF;
-        for (const auto& movimiento : obtenerMovimientosPosibles(tablero,jugador)) {
-            int eval = minimax(movimiento, profundidad - 1,jugador-1, true);
+
+        for (int i = 0; i < movimientosP.size();i++) {
+            int eval = minimax(movimientosP[i], profundidad - 1,jugador-1, true);
+
             minEval = min(minEval, eval);
         }
         return minEval;
@@ -1235,18 +1233,27 @@ int minimax(vector<vector<int>> tablero, int profundidad, int jugador, bool esMa
 
 }
 
- vector<vector<int>> encontrarMejorMovimiento(vector<vector<int>> tablero, int profundidad, int jugador){
+vector<vector<int>> encontrarMejorMovimiento(vector<vector<int>> tablero, int profundidad, int jugador){
     int mejorValor = NEG_INF;
     vector<vector<int>> mejorMovimiento;
 
-    for (const auto& movimiento : obtenerMovimientosPosibles(tablero, jugador)) {
+    vector<vector<vector<int>>> movimientosP = obtenerMovimientosPosibles(tablero, jugador);
 
-        int valorMovimiento = minimax(movimiento, profundidad - 1,jugador+1, false);
+    #pragma omp parallel for schedule(dynamic) shared(mejorValor, mejorMovimiento)
+    for (int i = 0; i< movimientosP.size();i++) {
 
-        if (valorMovimiento > mejorValor) {
-            mejorValor = valorMovimiento;
-            mejorMovimiento = movimiento;
-        }
+                int valorMovimiento = minimax(movimientosP[i], profundidad - 1,jugador+1, false);
+
+                #pragma omp critical
+                {
+                if (valorMovimiento > mejorValor) {
+                    mejorValor = valorMovimiento;
+                    mejorMovimiento = movimientosP[i];
+                }
+                }
+
+
+
     }
 
     return mejorMovimiento;
@@ -1366,7 +1373,11 @@ int calcularPuntajeIA(vector<vector<int>> tablero){
         {
 
             if(turno == 1){
+                long inicio = obtenerTiempo();
                 vector<vector<int>> movimientoIA = encontrarMejorMovimiento(tablero,5,1);
+                long fin = obtenerTiempo();
+                cout << "\nEl tiempo de ejecución fue: " << (fin-inicio) << " ms \n";
+
                 tablero = movimientoIA;
                 movimientosLista[0]+=1;
                 sonidoMover.play();
@@ -1375,9 +1386,9 @@ int calcularPuntajeIA(vector<vector<int>> tablero){
                 break;
             }
 
-            if(!quedanFichasOponente(tablero,ganador))
+            if(!quedanFichasOponente(tablero,turno))
             {
-                cout << "se quedo sin fichas " << ganador <<  endl;
+                cout << "se quedo sin fichas " << turno <<  endl;
                 puntajeGanador = -1;
                 for (size_t i = 0; i < listaJugadores.size(); ++i)
                 {
@@ -1387,7 +1398,7 @@ int calcularPuntajeIA(vector<vector<int>> tablero){
                 Jugador::determinarEstado(puntajes, listaJugadores);
                 Jugador::guardarJugadoresEnArchivo(listaJugadores);
 
-                mostrarGanador(listaJugadores[ganador],font, 1, puntajeGanador);
+                mostrarGanador(listaJugadores[turno],font, 1, puntajeGanador);
                 Damas.close();
                 break;
             }
@@ -2129,6 +2140,7 @@ void iniciarJuego()
 
 int main()
 {
+
     iniciarJuego();
     return 0;
 }

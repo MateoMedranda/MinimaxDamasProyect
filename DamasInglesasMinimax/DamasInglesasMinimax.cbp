@@ -13,6 +13,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-fopenmp" />
 					<Add directory="C:/Users/MATEO/Desktop/MinimaxDamasProyect/DamasInglesasMinimax/SFML-2.6.1/include" />
 				</Compiler>
 				<Linker>
@@ -20,6 +21,7 @@
 					<Add library="sfml-window-d" />
 					<Add library="sfml-audio-d" />
 					<Add library="sfml-system-d" />
+					<Add library="libgomp" />
 					<Add directory="C:/Users/MATEO/Desktop/MinimaxDamasProyect/DamasInglesasMinimax/SFML-2.6.1/lib" />
 				</Linker>
 			</Target>
