@@ -1,4 +1,4 @@
 Usuario         || Puntaje    || Movimientos     || Estado    
 ------------------------------------------------------------
 Computador      || 12         || 18              || Ganador   
-Humano          || 5          || 18              || Perdedor  
+Humano          || 2          || 18              || Perdedor  

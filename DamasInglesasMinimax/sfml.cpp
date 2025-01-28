@@ -1372,6 +1372,22 @@ int calcularPuntajeIA(vector<vector<int>> tablero){
         while(Damas.pollEvent(aevent))
         {
 
+            if(turno == 1){
+                long inicio = obtenerTiempo();
+                vector<vector<int>> movimientoIA = encontrarMejorMovimiento(tablero,5,1);
+                long fin = obtenerTiempo();
+                cout << "\nEl tiempo de ejecución fue: " << (fin-inicio) << " ms \n";
+
+                tablero = movimientoIA;
+                movimientosLista[0]+=1;
+                sonidoMover.play();
+                puntajes[0] = calcularPuntajeIA(tablero);
+                turno = 2;
+                break;
+            }
+
+
+
             if(!quedanFichasOponente(tablero,turno))
             {
                 cout << "se quedo sin fichas " << turno <<  endl;
@@ -1417,20 +1433,6 @@ int calcularPuntajeIA(vector<vector<int>> tablero){
                 Jugador::guardarJugadoresEnArchivo(listaJugadores);
 
                 Damas.close();
-                break;
-            }
-
-            if(turno == 1){
-                long inicio = obtenerTiempo();
-                vector<vector<int>> movimientoIA = encontrarMejorMovimiento(tablero,5,1);
-                long fin = obtenerTiempo();
-                cout << "\nEl tiempo de ejecución fue: " << (fin-inicio) << " ms \n";
-
-                tablero = movimientoIA;
-                movimientosLista[0]+=1;
-                sonidoMover.play();
-                puntajes[0] = calcularPuntajeIA(tablero);
-                turno = 2;
                 break;
             }
 
