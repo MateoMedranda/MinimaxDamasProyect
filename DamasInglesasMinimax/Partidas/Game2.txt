@@ -1,4 +1,4 @@
 Usuario         || Puntaje    || Movimientos     || Estado    
 ------------------------------------------------------------
-Computador      || 0          || 0               || Empate    
-Humano          || 0          || 0               || Empate    
+Computador      || 11         || 35              || Ganador   
+Humano          || 6          || 35              || Perdedor  
