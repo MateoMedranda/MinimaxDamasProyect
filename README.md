@@ -1,6 +1,6 @@
-# 📌 Nombre del Proyecto
+# 📌 MINIMAX DAMAS INGLESAS
 
-![Banner del Proyecto](ruta/a/la/imagen.png)
+![Banner del Proyecto](DamasInglesasMinimax/Texturas/fondoMenuPrincipal.png)
 
 ## 📖 Descripción
 Breve descripción del proyecto. Explica su propósito y qué problemas resuelve.
