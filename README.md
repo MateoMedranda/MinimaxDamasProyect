@@ -14,13 +14,4 @@ Las damas son un juego de mesa estratégico, las fichas pueden solo moverse por 
 ## 🎥 Demostración
 ![Vista previa](DamasInglesasMinimax/Texturas/tablero_damas.png)
 
-## 📦 Instalación
-```bash
-# Clonar el repositorio
-git clone https://github.com/usuario/repositorio.git
-
-# Entrar al directorio
-cd repositorio
-
-# Instalar dependencias
-npm install  # o pip install -r requirements.txt para Python
+[📄 Ver Manual de Usuario](DamasInglesasMinimax/Texturas/Manual Técnico.pdf)
