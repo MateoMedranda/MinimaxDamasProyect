@@ -12,7 +12,7 @@ Las damas son un juego de mesa estratégico, las fichas pueden solo moverse por 
 - ✅ Código de forma gráfica con SFML 
 
 ## 🎥 Demostración
-![Vista previa](ruta/a/la/demostracion.gif)
+![Vista previa](DamasInglesasMinimax/Texturas/tablero_damas.png)
 
 ## 📦 Instalación
 ```bash
