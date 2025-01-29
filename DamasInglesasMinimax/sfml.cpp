@@ -1944,7 +1944,7 @@ void iniciarJuego()
     soundButton.setPosition(25, 25);
     soundButton.setScale(0.5f, 0.5f);
 
-    musica.openFromFile("Audios/musicaMenu.ogg");
+    musica.openFromFile("Audios/musicaExtra.wav");
 
 
     RectangleShape fondo, fondoC;
@@ -1971,7 +1971,7 @@ void iniciarJuego()
     for (int i = 0; i<4; i++)
     {
         botones[i] = Boton(textoBotonesMenu[i], {325,80},70,Color(255, 255, 255, 10),Color::White);
-        botones[i].setPosition({225, posicion + i*100});
+        botones[i].setPosition({150, posicion + i*100});
         botones[i].setFont(font);
 
     }
@@ -2008,7 +2008,6 @@ void iniciarJuego()
 
     bool soundOn = true;
     musica.play();
-    musica.setPlayingOffset(seconds(10.f));
     musica.setVolume(30);
     musica.setLoop(true);
     while(MENU.isOpen())
