@@ -14,4 +14,4 @@ Las damas son un juego de mesa estratégico, las fichas pueden solo moverse por 
 ## 🎥 Demostración
 ![Vista previa](DamasInglesasMinimax/Texturas/tablero_damas.png)
 
-[📄 Ver Manual de Usuario](DamasInglesasMinimax/Texturas/Manual.pdf)
+[📄 Ver Manual de INSTALACIÓN](DamasInglesasMinimax/Texturas/Manual.pdf)
